@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/sample-go-webapp
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install glide
+          command: curl https://glide.sh/get | sh
+      - run:
+          name: Install dependencies
+          command: glide up
+      - run:
+          name: Build application binary
+          command: go build
+      - run:
+          name: Build application docker image
+          command: docker build -t app .
+      - deploy:
+          name: Push application docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              login="$(aws ecr get-login)"
+              ${login}
+              docker tag app "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
+              docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
+            fi
