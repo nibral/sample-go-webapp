@@ -11,7 +11,7 @@ jobs:
           name: Install AWS CLI
           command: |
             sudo apt-get update
-            sudo apt-get -y -q python-pip
+            sudo apt-get -y -q install python-pip
             pip install awscli
       - run:
           name: Install glide
