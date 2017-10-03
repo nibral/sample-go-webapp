@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Build application docker image
           command: docker build -t app .
-      - deploy:
+      - run:
           name: Push application docker image
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
@@ -34,3 +34,6 @@ jobs:
               docker tag app "${ECR_ENDPOINT}/sample-go-webapp:${CIRCLE_SHA1}"
               docker push "${ECR_ENDPOINT}/sample-go-webapp:${CIRCLE_SHA1}"
             fi
+      - deploy:
+          name: Update ECS task definition
+          command: ./ecs-deploy -c sample-webapp-cluster -n sample-webapp -i "${ECR_ENDPOINT}/sample-go-webapp:${CIRCLE_SHA1}"
